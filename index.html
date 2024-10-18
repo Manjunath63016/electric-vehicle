@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Energy Management System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+        h1 {
+            color: #914d5a;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, button {
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background: #e7f3fe;
+            border: 1px solid #b3d4fc;
+            border-radius: 5px;
+        }
+        canvas {
+            margin-top: 20px;
+        }
+        .sustainability-goals {
+            margin-top: 20px;
+            background: #e0ffe0;
+            padding: 10px;
+            border: 1px solid #a3d5a3;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>EV Energy Management System</h1>
+    
+    <label for="batteryHealth">Battery Health (%):</label>
+    <input type="number" id="batteryHealth" placeholder="Enter battery health" min="0" max="100">
+    
+    <label for="energyConsumption">Current Energy Consumption (Wh/km):</label>
+    <input type="number" id="energyConsumption" placeholder="Enter energy consumption" min="0">
+    
+    <label for="brakingEfficiency">Braking Efficiency (%):</label>
+    <input type="number" id="brakingEfficiency" placeholder="Enter braking efficiency" min="0" max="100">
+    
+    <label for="solarPower">Solar Power Contribution (kW):</label>
+    <input type="number" id="solarPower" placeholder="Enter solar power contribution" min="0">
+    
+    <button onclick="optimizeEnergy()">Optimize Energy Consumption</button>
+    
+    <div id="result"></div>
+    
+    <canvas id="performanceChart" width="400" height="200"></canvas>
+    <canvas id="v2gChart" width="400" height="200"></canvas>
+
+    <div class="sustainability-goals">
+        <h2>Sustainability Goals</h2>
+        <p>1. Reduce carbon footprint by 50% by 2030.</p>
+        <p>2. Achieve 100% renewable energy usage by 2040.</p>
+        <p>3. Increase the use of lightweight materials to improve efficiency.</p>
+    </div>
+</div>
+
+<script>
+    const ctxPerformance = document.getElementById('performanceChart').getContext('2d');
+    const ctxV2G = document.getElementById('v2gChart').getContext('2d');
+
+    const performanceData = {
+        labels: [],
+        datasets: [{
+            label: 'Energy Consumption (Wh/km)',
+            data: [],
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            fill: false,
+        }]
+    };
+
+    const v2gData = {
+        labels: [],
+        datasets: [{
+            label: 'Grid Interaction (kW)',
+            data: [],
+            borderColor: 'rgba(255, 99, 132, 1)',
+            borderWidth: 2,
+            fill: false,
+        }]
+    };
+
+    const performanceChart = new Chart(ctxPerformance, {
+        type: 'line',
+        data: performanceData,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Energy Consumption (Wh/km)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time (s)'
+                    }
+                }
+            }
+        }
+    });
+
+    const v2gChart = new Chart(ctxV2G, {
+        type: 'line',
+        data: v2gData,
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Grid Interaction (kW)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Time (s)'
+                    }
+                }
+            }
+        }
+    });
+
+    let timeCounter = 0;
+
+    function optimizeEnergy() {
+        const batteryHealth = parseFloat(document.getElementById('batteryHealth').value);
+        const energyConsumption = parseFloat(document.getElementById('energyConsumption').value);
+        const brakingEfficiency = parseFloat(document.getElementById('brakingEfficiency').value);
+        const solarPower = parseFloat(document.getElementById('solarPower').value);
+        
+        let recommendations = [];
+
+        if (batteryHealth < 20) {
+            recommendations.push("Battery health is low. Consider charging or reducing load.");
+        }
+        
+        if (energyConsumption > 20) {
+            recommendations.push("Energy consumption is high. Consider driving at lower speeds.");
+        }
+
+        if (brakingEfficiency < 70) {
+            recommendations.push("Braking efficiency is low. Ensure brake system is functioning properly.");
+        }
+
+        if (solarPower > 0) {
+            recommendations.push("Utilizing solar power can improve energy efficiency.");
+        }
+
+        if (recommendations.length === 0) {
+            recommendations.push("Your vehicle is operating efficiently.");
+        }
+
+        document.getElementById('result').innerHTML = recommendations.join("<br>");
+
+        // Update performance chart
+        performanceData.labels.push(timeCounter++);
+        performanceData.datasets[0].data.push(energyConsumption);
+        performanceChart.update();
+
+        // Simulate V2G interaction
+        const gridInteraction = (batteryHealth / 100) * (solarPower || 0); // Simplified V2G logic
+        v2gData.labels.push(timeCounter - 1);
+        v2gData.datasets[0].data.push(gridInteraction);
+        v2gChart.update();
+    }
+</script>
+
+</body>
+</html>
